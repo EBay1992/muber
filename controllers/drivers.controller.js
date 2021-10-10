@@ -38,4 +38,18 @@ module.exports = {
       next(error);
     }
   },
+
+  async indexDriver(req, res, next) {
+    try {
+      const { lng, lat } = req.query;
+      const area = { center: [lng, lat], radius: 20, unique: true };
+      const foundedDriver = await Driver.find({})
+        .where("geometry")
+        .circle(area);
+
+      res.send(foundedDriver);
+    } catch (error) {
+      next(error);
+    }
+  },
 };

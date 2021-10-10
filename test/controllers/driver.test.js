@@ -50,4 +50,21 @@ describe("Drivers Controllers", () => {
     const deletedDriver = await Driver.findById(driver._id);
     expect(deletedDriver).toBe(null);
   });
+
+  test("Get to /api/drivers find drivers in a location", async () => {
+    const seatteleDriver = await Driver.create({
+      email: "seattleDrive@test.com",
+      geometry: { type: "Point", coordinates: [-122.475, 47.614] },
+    });
+    const miamiDriver = await Driver.create({
+      email: "miamiDriver@test.com",
+      geometry: { type: "Point", coordinates: [-80.253, 25.791] },
+    });
+    const result = await request(app)
+      .get("/api/drivers")
+      .query({ lng: -80, lat: 25 });
+
+    expect(result.body.length).toBe(1);
+    expect(result.body[0].email).toBe("miamiDriver@test.com");
+  });
 });
