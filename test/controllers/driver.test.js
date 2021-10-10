@@ -19,14 +19,35 @@ describe("Drivers Controllers", () => {
   afterAll(async () => {
     mongoose.disconnect();
   });
+
   test("Post a new driver", async () => {
     try {
       const beforeCount = await Driver.count();
-      await request(app).post("/api/driver").send({ email: "test@test.com" });
+      await request(app).post("/api/drivers").send({ email: "test@test.com" });
       const afterCount = await Driver.count();
       expect(afterCount - beforeCount).toBe(1);
     } catch (error) {
       console.log(error);
     }
+  });
+
+  test("put to an existing /api/drivers/id edits an existing driver", async () => {
+    const driver = await Driver.create({ email: "beforePutRequest@test.com" });
+    await request(app)
+      .put(`/api/drivers/${driver._id}`)
+      .send({ email: "afterPutRequest@test.com", driving: true });
+    const updatedDriver = await Driver.findOne({ id: driver._id });
+    expect(updatedDriver.email).toBe("afterPutRequest@test.com");
+    expect(updatedDriver.driving).toBe(true);
+  });
+
+  test("delete to an existing /api/drivers/id delete the driver", async () => {
+    const driver = await Driver.create({
+      email: "driverbeforeDelete@test.com",
+    });
+    await request(app).delete(`/api/drivers/${driver._id}`);
+
+    const deletedDriver = await Driver.findById(driver._id);
+    expect(deletedDriver).toBe(null);
   });
 });
